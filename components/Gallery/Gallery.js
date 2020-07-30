@@ -1,20 +1,18 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
   ScrollView,
   View,
   Text,
-  StatusBar,
   Image,
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
 
-import {store, addPhotos} from '../redux/redux';
+// import {store} from '../../App';
 
-import {URL} from '../api/api';
-import {connect} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {getGallery} from '../bll/thunk';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -32,49 +30,46 @@ const styles = StyleSheet.create({
 });
 
 const Gallery = ({navigation}) => {
-  const fetchData = async () => {
-    await fetch(URL)
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        store.dispatch(addPhotos(data));
-      });
-  };
+  const dispatch = useDispatch();
   useEffect(() => {
-    fetchData();
-  }, []);
+    dispatch(getGallery());
+  }, [dispatch]);
 
-  const photos = store.getState().photos;
+  const state = useSelector((store) => ({
+    gallery: store.photos,
+    error: store.loadingError,
+  }));
 
-  if (photos.length) {
-    return (
-      <ScrollView>
-        <Text>Gallery</Text>
-        {photos.map((item) => (
-          <View key={item.id} style={styles.container}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('Large Photo', {
-                  url: item.urls.regular,
-                  name: item.user.name,
-                })
-              }>
-              <Image
-                style={styles.tinyLogo}
-                source={{uri: `${item.urls.small}`}}
-              />
-              <Text>{item.user.name}</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </ScrollView>
-    );
+  if (state.error) {
+    return <Text>LOADING ERROR</Text>;
   } else {
-    return <Text>Loading...</Text>;
+    if (state.gallery.length) {
+      return (
+        <ScrollView>
+          <Text>Gallery</Text>
+          {state.gallery.map((item) => (
+            <View key={item.id} style={styles.container}>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('Large Photo', {
+                    url: item.urls.regular,
+                    name: item.user.name,
+                  })
+                }>
+                <Image
+                  style={styles.tinyLogo}
+                  source={{uri: `${item.urls.small}`}}
+                />
+                <Text>{item.user.name}</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
+      );
+    } else {
+      return <Text>Loading photos from server...</Text>;
+    }
   }
 };
 
-export default connect((state) => ({
-  state: state,
-}))(Gallery);
+export default Gallery;

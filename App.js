@@ -1,25 +1,17 @@
 import React from 'react';
 import 'react-native-gesture-handler';
-import {Provider, connect} from 'react-redux';
+import {createStore, applyMiddleware} from 'redux';
+import thunk from 'redux-thunk';
+import {Provider} from 'react-redux';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 
-import {store} from './components/redux/redux';
-
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-  Image,
-  Dimensions,
-} from 'react-native';
+import {reducer} from './components/bll/redux';
 
 import Gallery from './components/Gallery/Gallery';
 import {LargePhoto} from './components/LargePhoto/LargePhoto';
 
+export const store = createStore(reducer, applyMiddleware(thunk));
 const Stack = createStackNavigator();
 
 const App = () => (
