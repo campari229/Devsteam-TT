@@ -1,6 +1,5 @@
 import React, {useEffect} from 'react';
 import {
-  StyleSheet,
   ScrollView,
   View,
   Text,
@@ -9,25 +8,9 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-// import {store} from '../../App';
-
 import {useDispatch, useSelector} from 'react-redux';
-import {getGallery} from '../bll/thunk';
-
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 30,
-    alignItems: 'center',
-  },
-  tinyLogo: {
-    width: windowWidth - 30,
-    height: windowHeight / 3,
-  },
-});
+import {getGallery} from '../../bll/thunk';
+import {styles} from '../Style/mainStyle';
 
 const Gallery = ({navigation}) => {
   const dispatch = useDispatch();
@@ -41,33 +24,32 @@ const Gallery = ({navigation}) => {
   }));
 
   if (state.error) {
-    return <Text>LOADING ERROR</Text>;
+    return <Text style={styles.error}>LOADING ERROR</Text>;
   } else {
     if (state.gallery.length) {
       return (
-        <ScrollView>
-          <Text>Gallery</Text>
+        <ScrollView style={styles.back}>
           {state.gallery.map((item) => (
-            <View key={item.id} style={styles.container}>
+            <View key={item.id} style={styles.photoContainer}>
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate('Large Photo', {
+                  navigation.navigate('Full Photo', {
                     url: item.urls.regular,
                     name: item.user.name,
                   })
                 }>
                 <Image
-                  style={styles.tinyLogo}
+                  style={styles.smallPhoto}
                   source={{uri: `${item.urls.small}`}}
                 />
-                <Text>{item.user.name}</Text>
+                <Text style={styles.autorName}>{item.user.name}</Text>
               </TouchableOpacity>
             </View>
           ))}
         </ScrollView>
       );
     } else {
-      return <Text>Loading photos from server...</Text>;
+      return <Text style={styles.loading}>Loading photos from server...</Text>;
     }
   }
 };
